@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Главная - Корочки.есть</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Добро пожаловать, <span id="userName"></span>!</h2>
+    
+    <div class="slider">
+        <div class="slides">
+            <img src="/images/1.jpg" alt="Курсы">
+            <img src="/images/2.jpg" alt="Обучение">
+            <img src="/images/3.jpg" alt="Диплом">
+            <img src="/images/4.jpg" alt="Успех">
+        </div>
+        <button class="prev" onclick="changeSlide(-1)">❮</button>
+        <button class="next" onclick="changeSlide(1)">❯</button>
+    </div>
+
+    <div class="menu">
+        <a href="/create">Создать заявку</a>
+        <a href="/my-requests">Мои заявки</a>
+        <a href="#" id="logoutBtn">Выйти</a>
+    </div>
+</div>
+<script>
+    let slideIndex = 0;
+    const slides = document.querySelector('.slides');
+    const total = document.querySelectorAll('.slides img').length;
+    function showSlide() { slides.style.transform = `translateX(-${slideIndex * 100}%)`; }
+    window.changeSlide = (n) => { slideIndex = (slideIndex + n + total) % total; showSlide(); };
+    setInterval(() => changeSlide(1), 3000);
+    showSlide();
+
+    fetch('/api/me').then(r => r.json()).then(data => {
+        if (data.user) document.getElementById('userName').innerText = data.user.full_name;
+    });
+    document.getElementById('logoutBtn').onclick = async () => {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = '/login';
+    };
+</script>
+</body>
+</html>

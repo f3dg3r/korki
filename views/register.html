@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Регистрация - Корочки.есть</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Регистрация</h2>
+    <form id="registerForm">
+        <input type="text" name="login" placeholder="Логин (латиница+цифры, >=6)" required>
+        <input type="password" name="password" placeholder="Пароль (>=8 символов)" required>
+        <input type="text" name="full_name" placeholder="ФИО (кириллица)" required>
+        <input type="text" name="phone" placeholder="Телефон 8(XXX)XXX-XX-XX" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <div id="error" class="error"></div>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+</div>
+<script>
+    document.getElementById('registerForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            login: formData.get('login'),
+            password: formData.get('password'),
+            full_name: formData.get('full_name'),
+            phone: formData.get('phone'),
+            email: formData.get('email')
+        };
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+            window.location.href = '/home';
+        } else {
+            document.getElementById('error').innerText = result.error;
+        }
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Новая заявка - Корочки.есть</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Заявка на курс</h2>
+    <form id="createForm">
+        <select name="course_name" required>
+            <option value="">Выберите курс</option>
+            <option>Основы алгоритмизации и программирования</option>
+            <option>Основы веб-дизайна</option>
+            <option>Основы проектирования баз данных</option>
+        </select>
+        <input type="text" name="start_date" placeholder="Дата начала ДД.ММ.ГГГГ" required>
+        <select name="payment_method" required>
+            <option value="">Способ оплаты</option>
+            <option value="cash">Наличными</option>
+            <option value="transfer">Перевод по номеру телефона</option>
+        </select>
+        <div id="message"></div>
+        <button type="submit">Отправить</button>
+    </form>
+    <a href="/home">Назад</a>
+</div>
+<script>
+    const form = document.getElementById('createForm');
+    const msg = document.getElementById('message');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {
+            course_name: form.course_name.value,
+            start_date: form.start_date.value,
+            payment_method: form.payment_method.value
+        };
+        msg.innerText = 'Отправка...';
+        msg.style.color = 'black';
+        console.log('Отправляем данные:', data);
+        try {
+            const res = await fetch('/api/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            console.log('Ответ сервера:', result);
+            if (result.success) {
+                msg.style.color = 'green';
+                msg.innerText = 'Заявка создана! Переход...';
+                setTimeout(() => window.location.href = '/my-requests', 1000);
+            } else {
+                msg.style.color = 'red';
+                msg.innerText = 'Ошибка: ' + (result.error || 'Неизвестная ошибка');
+            }
+        } catch (err) {
+            console.error('Ошибка запроса:', err);
+            msg.style.color = 'red';
+            msg.innerText = 'Ошибка соединения с сервером';
+        }
+    };
+</script>
+</body>
+</html>

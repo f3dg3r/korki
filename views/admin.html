@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container admin">
+    <h2>Панель администратора</h2>
+    <select id="statusFilter">
+        <option value="all">Все статусы</option>
+        <option value="new">Новые</option>
+        <option value="in_progress">В процессе</option>
+        <option value="completed">Завершённые</option>
+    </select>
+    <div id="table"></div>
+    <div id="pagination"></div>
+    <a href="/home">Выйти</a>
+</div>
+<script>
+    let page = 1;
+    let status = 'all';
+    async function load() {
+        const res = await fetch(`/api/admin/requests?page=${page}&limit=5&status=${status}`);
+        const data = await res.json();
+        let html = '<table border="1" cellpadding="5" style="width:100%; border-collapse:collapse;">';
+        html += '<tr><th>ID</th><th>Пользователь</th><th>Курс</th><th>Статус</th><th>Действие</th></tr>';
+        for (let r of data.requests) {
+            html += `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${r.full_name}</td>
+                    <td>${r.course_name}</td>
+                    <td>
+                        <select onchange="updateStatus(${r.id}, this.value)">
+                            <option ${r.status === 'new' ? 'selected' : ''} value="new">Новая</option>
+                            <option ${r.status === 'in_progress' ? 'selected' : ''} value="in_progress">Идёт обучение</option>
+                            <option ${r.status === 'completed' ? 'selected' : ''} value="completed">Завершена</option>
+                        </select>
+                    </td>
+                </tr>
+            `;
+        }
+        html += '</table>';
+        document.getElementById('table').innerHTML = html;
+        let pages = '';
+        for (let i = 1; i <= Math.ceil(data.total / 5); i++) {
+            pages += `<button onclick="goPage(${i})">${i}</button>`;
+        }
+        document.getElementById('pagination').innerHTML = pages;
+    }
+    window.updateStatus = async (id, newStatus) => {
+        await fetch(`/api/admin/requests/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+        load();
+    };
+    window.goPage = (p) => { page = p; load(); };
+    document.getElementById('statusFilter').onchange = () => {
+        status = document.getElementById('statusFilter').value;
+        page = 1;
+        load();
+    };
+    load();
+</script>
+</body>
+</html>

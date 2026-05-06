@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Мои заявки - Корочки.есть</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Мои заявки</h2>
+    <div id="list">Загрузка...</div>
+    <a href="/home">Назад</a>
+</div>
+<script>
+    async function load() {
+        const res = await fetch('/api/my-requests');
+        const data = await res.json();
+        const container = document.getElementById('list');
+        if (!data.length) {
+            container.innerHTML = '<p>У вас пока нет заявок. <a href="/create">Создать</a></p>';
+            return;
+        }
+        let html = '';
+        for (let r of data) {
+            html += `
+                <div class="request-card">
+                    <strong>${r.course_name}</strong><br>
+                    Дата: ${r.start_date}<br>
+                    Оплата: ${r.payment_method === 'cash' ? 'Наличными' : 'Переводом'}<br>
+                    Статус: ${r.status === 'new' ? 'Новая' : r.status === 'in_progress' ? 'Идёт обучение' : 'Завершена'}<br>
+                    ${r.status === 'completed' ? (
+                        r.review ? `Отзыв: ${r.review}` :
+                        `<textarea id="rev-${r.id}" rows="2" placeholder="Ваш отзыв"></textarea>
+                         <button onclick="addReview(${r.id})">Оставить отзыв</button>`
+                    ) : ''}
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+    window.addReview = async (id) => {
+        const review = document.getElementById(`rev-${id}`).value;
+        const res = await fetch(`/api/review/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ review })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('Отзыв сохранён');
+            load();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    };
+    load();
+</script>
+</body>
+</html>
