@@ -23,3 +23,16 @@ git push -u origin main
 npm start	Запускает сервер (из package.json, где "start": "node server.js")
 node server.js	Альтернативный запуск без npm
 Ctrl + C	Остановка сервера
+
+┌───────────────┐          ┌──────────────────┐
+│     users     │          │    requests      │
+├───────────────┤          ├──────────────────┤
+│ id (PK)       │◄─────────│ user_id (FK)     │
+│ login         │          │ id (PK)          │
+│ password      │          │ course_name      │
+│ full_name     │          │ start_date       │
+│ phone         │          │ payment_method   │
+│ email         │          │ status           │
+│ role          │          │ review           │
+│ created_at    │          │ created_at       │
+└───────────────┘          └──────────────────┘
